@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Darren 投資網站 | 台股今日股價查詢</title>
+    <title>Darren 投資網站 | 台股三個月股價查詢</title>
     <meta
       name="description"
-      content="Darren 投資網站，輸入台股代號即可查詢今日股價、漲跌、成交量與更新時間。"
+      content="Darren 投資網站，輸入台股代號即可查詢近三個月股價並顯示走勢圖。"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -29,10 +29,10 @@
     <main id="top">
       <section class="hero">
         <div class="hero-copy">
-          <p class="eyebrow">Taiwan Stock Quote</p>
+          <p class="eyebrow">Taiwan Stock Chart</p>
           <h1>Darren 投資網站</h1>
           <p class="hero-text">
-            輸入台股代號，快速查看今日收盤價、漲跌、開盤、最高、最低與成交量。適合用來做每日盤後追蹤與快速確認。
+            輸入台股代號，查看近三個月每日收盤價、最新收盤資訊與走勢圖。適合做盤後追蹤與快速比較。
           </p>
           <a class="button primary" href="#quote">開始查詢</a>
         </div>
@@ -40,7 +40,7 @@
         <section id="quote" class="quote-panel" aria-labelledby="quote-title">
           <div class="quote-heading">
             <p class="eyebrow">Quote Search</p>
-            <h2 id="quote-title">今日股價查詢</h2>
+            <h2 id="quote-title">三個月股價查詢</h2>
           </div>
 
           <form class="quote-form" id="quote-form">
@@ -57,12 +57,12 @@
               />
               <button class="button primary" type="submit">查詢</button>
             </div>
-            <p class="form-hint">支援上市與上櫃股票，例如 2330、2317、0050、6488。</p>
+            <p class="form-hint">三個月走勢圖優先支援上市股票，例如 2330、2317、0050。</p>
           </form>
 
           <div class="quote-result" id="quote-result" aria-live="polite">
             <div class="empty-state">
-              <span>輸入股票代號後，這裡會顯示今日報價。</span>
+              <span>輸入股票代號後，這裡會顯示近三個月股價與走勢圖。</span>
             </div>
           </div>
         </section>
@@ -75,19 +75,19 @@
         </div>
         <div class="feature-grid">
           <article class="feature-card">
+            <span class="tag">Chart</span>
+            <h3>三個月走勢圖</h3>
+            <p>以每日收盤價繪製折線圖，快速看出近期高低點與方向。</p>
+          </article>
+          <article class="feature-card">
             <span class="tag">Price</span>
-            <h3>今日成交價</h3>
-            <p>顯示最近成交價，並附上開盤、最高、最低與昨收資訊。</p>
+            <h3>最新收盤資訊</h3>
+            <p>顯示最新收盤價、漲跌幅、開盤、最高、最低與成交量。</p>
           </article>
           <article class="feature-card">
-            <span class="tag">Change</span>
-            <h3>漲跌與百分比</h3>
-            <p>用顏色標示上漲、下跌或平盤，方便快速判斷盤勢。</p>
-          </article>
-          <article class="feature-card">
-            <span class="tag">Volume</span>
-          <h3>資料來源標示</h3>
-          <p>優先使用證交所官方盤後資料，找不到時再使用即時報價備援。</p>
+            <span class="tag">Source</span>
+            <h3>官方資料來源</h3>
+            <p>上市股票使用證交所官方歷史股價資料，找不到時顯示清楚提示。</p>
           </article>
         </div>
       </section>
@@ -98,7 +98,7 @@
           <h2>投資提醒</h2>
         </div>
         <p class="section-text">
-          本站提供股價查詢與資訊整理，不構成投資建議。上市股票優先顯示證交所官方盤後資料；盤中或上櫃資料可能改由備援來源提供，實際交易前請以券商或交易所資料為準。
+          本站提供股價查詢與資訊整理，不構成投資建議。三個月圖表目前優先支援上市股票；資料可能因交易所更新時間而延遲，實際交易前請以券商或交易所資料為準。
         </p>
       </section>
     </main>
@@ -107,6 +107,6 @@
       <p>© <span id="year"></span> Darren Invest. Data is for reference only.</p>
     </footer>
 
-    <script src="script.js?v=20260511-2"></script>
+    <script src="script.js?v=20260511-3"></script>
   </body>
 </html>
