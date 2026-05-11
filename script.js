@@ -22,6 +22,7 @@ const formatVolume = (value) => {
 
 const formatTime = (timestamp) => {
   if (!timestamp) return "--";
+  if (typeof timestamp === "string") return timestamp;
   return new Intl.DateTimeFormat("zh-TW", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -38,6 +39,83 @@ const setLoading = (code) => {
 
 const setError = (message) => {
   setResult(`<div class="error-state">${message}</div>`);
+};
+
+const parseNumber = (value) => {
+  if (typeof value !== "string" && typeof value !== "number") return NaN;
+  const number = Number(String(value).replace(/,/g, "").trim());
+  return Number.isFinite(number) ? number : NaN;
+};
+
+const parseTwseCsv = (csv) => {
+  return csv
+    .trim()
+    .split(/\r?\n/)
+    .slice(1)
+    .map((line) => {
+      const fields = [];
+      let current = "";
+      let inQuote = false;
+
+      for (const char of line) {
+        if (char === '"') {
+          inQuote = !inQuote;
+        } else if (char === "," && !inQuote) {
+          fields.push(current);
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+
+      fields.push(current);
+      return fields.map((field) => field.trim());
+    });
+};
+
+const formatRocDate = (value) => {
+  if (!/^\d{7}$/.test(value)) return value || "今日盤後";
+  const year = Number(value.slice(0, 3)) + 1911;
+  const month = value.slice(3, 5);
+  const day = value.slice(5, 7);
+  return `${year}/${month}/${day} 收盤`;
+};
+
+const getQuoteFromTwseDaily = async (code) => {
+  const endpoint = "https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL?response=open_data";
+  const response = await fetch(endpoint, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error("證交所官方資料沒有回應");
+  }
+
+  const csv = await response.text();
+  const rows = parseTwseCsv(csv);
+  const row = rows.find((fields) => fields[1] === code);
+
+  if (!row) {
+    throw new Error("證交所查無上市資料");
+  }
+
+  const price = parseNumber(row[8]);
+  const change = parseNumber(row[9]);
+  const previousClose = Number.isFinite(change) ? price - change : NaN;
+
+  return {
+    code,
+    symbol: code,
+    exchange: "上市",
+    name: row[2] || code,
+    price,
+    previousClose,
+    open: parseNumber(row[5]),
+    high: parseNumber(row[6]),
+    low: parseNumber(row[7]),
+    volume: parseNumber(row[3]),
+    time: formatRocDate(row[0]),
+    currency: "TWD",
+    source: "證交所官方盤後資料",
+  };
 };
 
 const getQuoteFromTaiwanProxy = async (code) => {
@@ -60,12 +138,12 @@ const getQuoteFromTaiwanProxy = async (code) => {
     exchange: data.market === "otc" ? "上櫃" : "上市",
     name: data.symbol || code,
     price: data.price,
-    previousClose: Number(data.meta?.prevClose),
-    open: Number(data.meta?.open),
-    high: Number(data.meta?.high),
-    low: Number(data.meta?.low),
-    volume: Number(data.meta?.volume),
-    time: data.meta?.time,
+    previousClose: Number(data.meta && data.meta.prevClose),
+    open: Number(data.meta && data.meta.open),
+    high: Number(data.meta && data.meta.high),
+    low: Number(data.meta && data.meta.low),
+    volume: Number(data.meta && data.meta.volume),
+    time: data.meta && data.meta.time,
     currency: "TWD",
     source: data.source ? `Taiwan Stock API / ${data.source}` : "Taiwan Stock API",
   };
@@ -81,8 +159,8 @@ const getQuoteFromYahoo = async (code, suffix) => {
   }
 
   const data = await response.json();
-  const quote = data.chart?.result?.[0];
-  const meta = quote?.meta;
+  const quote = data.chart && data.chart.result && data.chart.result[0];
+  const meta = quote && quote.meta;
 
   if (!meta || !Number.isFinite(meta.regularMarketPrice)) {
     throw new Error("查無報價");
@@ -106,6 +184,12 @@ const getQuoteFromYahoo = async (code, suffix) => {
 };
 
 const getQuote = async (code) => {
+  try {
+    return await getQuoteFromTwseDaily(code);
+  } catch (error) {
+    // OTC symbols and intraday fallback continue below.
+  }
+
   try {
     return await getQuoteFromTaiwanProxy(code);
   } catch (error) {
@@ -188,23 +272,25 @@ const renderQuote = (quote) => {
   `);
 };
 
-form?.addEventListener("submit", async (event) => {
-  event.preventDefault();
+if (form) {
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-  const code = input.value.trim().replace(/\D/g, "");
-  input.value = code;
+    const code = input.value.trim().replace(/\D/g, "");
+    input.value = code;
 
-  if (!/^\d{4,6}$/.test(code)) {
-    setError("請輸入正確的台股代號，例如 2330、0050、6488。");
-    return;
-  }
+    if (!/^\d{4,6}$/.test(code)) {
+      setError("請輸入正確的台股代號，例如 2330、0050、6488。");
+      return;
+    }
 
-  setLoading(code);
+    setLoading(code);
 
-  try {
-    const quote = await getQuote(code);
-    renderQuote(quote);
-  } catch (error) {
-    setError("目前查不到這個代號的報價。請確認股票代號是否正確，或稍後再試。");
-  }
-});
+    try {
+      const quote = await getQuote(code);
+      renderQuote(quote);
+    } catch (error) {
+      setError("目前查不到這個代號的報價。請確認股票代號是否正確，或稍後再試。");
+    }
+  });
+}
