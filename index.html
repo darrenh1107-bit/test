@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Darren 投資網站 | 台股三個月股價查詢</title>
+    <title>Darren 投資網站 | 台股股價查詢</title>
     <meta
       name="description"
-      content="Darren 投資網站，輸入台股代號即可查詢近三個月股價並顯示走勢圖。"
+      content="Darren 投資網站，輸入台股公司名稱或股票代號，查詢當日股價或近三個月收盤價走勢圖。"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -29,10 +29,10 @@
     <main id="top">
       <section class="hero">
         <div class="hero-copy">
-          <p class="eyebrow">Taiwan Stock Chart</p>
+          <p class="eyebrow">Taiwan Stock Tool</p>
           <h1>Darren 投資網站</h1>
           <p class="hero-text">
-            輸入台股代號，查看近三個月每日收盤價、最新收盤資訊與走勢圖。適合做盤後追蹤與快速比較。
+            輸入中文公司名稱或股票代號，選擇查詢當日股價，或查看近三個月每日收盤價折線圖。
           </p>
           <a class="button primary" href="#quote">開始查詢</a>
         </div>
@@ -40,29 +40,43 @@
         <section id="quote" class="quote-panel" aria-labelledby="quote-title">
           <div class="quote-heading">
             <p class="eyebrow">Quote Search</p>
-            <h2 id="quote-title">三個月股價查詢</h2>
+            <h2 id="quote-title">台股查詢</h2>
           </div>
 
           <form class="quote-form" id="quote-form">
-            <label for="stock-code">台股代號</label>
+            <label for="stock-query">公司名稱或股票代號</label>
             <div class="search-row">
               <input
-                id="stock-code"
-                name="stockCode"
-                inputmode="numeric"
+                id="stock-query"
+                name="stockQuery"
                 autocomplete="off"
-                maxlength="6"
-                placeholder="例如 2330"
+                maxlength="30"
+                placeholder="例如 台積電、鴻海、2330"
                 required
               />
               <button class="button primary" type="submit">查詢</button>
             </div>
-            <p class="form-hint">三個月走勢圖優先支援上市股票，例如 2330、2317、0050。</p>
+
+            <fieldset class="mode-field">
+              <legend>查詢項目</legend>
+              <label>
+                <input type="radio" name="queryMode" value="daily" checked />
+                <span>當日股價</span>
+              </label>
+              <label>
+                <input type="radio" name="queryMode" value="history" />
+                <span>三個月收盤價折線圖</span>
+              </label>
+            </fieldset>
+
+            <p class="form-hint">
+              支援上市股票代號與中文名稱，例如 2330、台積電、2317、鴻海、0050。
+            </p>
           </form>
 
           <div class="quote-result" id="quote-result" aria-live="polite">
             <div class="empty-state">
-              <span>輸入股票代號後，這裡會顯示近三個月股價與走勢圖。</span>
+              <span>輸入公司名稱或代號，選擇查詢項目後，這裡會顯示結果。</span>
             </div>
           </div>
         </section>
@@ -75,19 +89,19 @@
         </div>
         <div class="feature-grid">
           <article class="feature-card">
+            <span class="tag">Search</span>
+            <h3>名稱或代號查詢</h3>
+            <p>可輸入中文公司名稱、部分名稱或股票代號，系統會自動比對上市股票清單。</p>
+          </article>
+          <article class="feature-card">
+            <span class="tag">Daily</span>
+            <h3>當日股價</h3>
+            <p>顯示最新收盤價、漲跌、開盤、最高、最低、成交量與更新日期。</p>
+          </article>
+          <article class="feature-card">
             <span class="tag">Chart</span>
-            <h3>三個月走勢圖</h3>
-            <p>以每日收盤價繪製折線圖，快速看出近期高低點與方向。</p>
-          </article>
-          <article class="feature-card">
-            <span class="tag">Price</span>
-            <h3>最新收盤資訊</h3>
-            <p>顯示最新收盤價、漲跌幅、開盤、最高、最低與成交量。</p>
-          </article>
-          <article class="feature-card">
-            <span class="tag">Source</span>
-            <h3>官方資料來源</h3>
-            <p>上市股票使用證交所官方歷史股價資料，找不到時顯示清楚提示。</p>
+            <h3>三個月折線圖</h3>
+            <p>以每日收盤價繪製三個月走勢，快速掌握近期價格方向。</p>
           </article>
         </div>
       </section>
@@ -98,7 +112,7 @@
           <h2>投資提醒</h2>
         </div>
         <p class="section-text">
-          本站提供股價查詢與資訊整理，不構成投資建議。三個月圖表目前優先支援上市股票；資料可能因交易所更新時間而延遲，實際交易前請以券商或交易所資料為準。
+          本站提供股價查詢與資訊整理，不構成投資建議。資料來源為證交所公開資料，可能因交易所更新時間而延遲；實際交易前請以券商或交易所資料為準。
         </p>
       </section>
     </main>
@@ -107,6 +121,6 @@
       <p>© <span id="year"></span> Darren Invest. Data is for reference only.</p>
     </footer>
 
-    <script src="script.js?v=20260511-3"></script>
+    <script src="script.js?v=20260511-4"></script>
   </body>
 </html>

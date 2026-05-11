@@ -1,9 +1,11 @@
 const year = document.querySelector("#year");
 const form = document.querySelector("#quote-form");
-const input = document.querySelector("#stock-code");
+const input = document.querySelector("#stock-query");
 const result = document.querySelector("#quote-result");
 
+const dailyEndpoint = "https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL?response=open_data";
 let latestChartPoints = [];
+let listedStocksCache = null;
 
 if (year) {
   year.textContent = new Date().getFullYear();
@@ -28,6 +30,27 @@ const parseNumber = (value) => {
   return Number.isFinite(number) ? number : NaN;
 };
 
+const parseCsvLine = (line) => {
+  const fields = [];
+  let current = "";
+  let inQuote = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+    if (char === '"') {
+      inQuote = !inQuote;
+    } else if (char === "," && !inQuote) {
+      fields.push(current.trim());
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+
+  fields.push(current.trim());
+  return fields;
+};
+
 const parseRocDate = (value) => {
   const parts = String(value).split("/");
   if (parts.length !== 3) return "";
@@ -35,24 +58,81 @@ const parseRocDate = (value) => {
   return `${yearNumber}-${parts[1].padStart(2, "0")}-${parts[2].padStart(2, "0")}`;
 };
 
+const formatRocCompactDate = (value) => {
+  if (!/^\d{7}$/.test(value)) return value || "--";
+  const fullYear = Number(value.slice(0, 3)) + 1911;
+  return `${fullYear}/${value.slice(3, 5)}/${value.slice(5, 7)}`;
+};
+
 const formatDisplayDate = (isoDate) => {
   if (!isoDate) return "--";
-  const [y, m, d] = isoDate.split("-");
-  return `${y}/${m}/${d}`;
+  const parts = isoDate.split("-");
+  return `${parts[0]}/${parts[1]}/${parts[2]}`;
 };
 
 const setResult = (html) => {
   result.innerHTML = html;
 };
 
-const setLoading = (code) => {
+const setLoading = (text) => {
   latestChartPoints = [];
-  setResult(`<div class="loading-state">正在查詢 ${code} 近三個月股價...</div>`);
+  setResult(`<div class="loading-state">${text}</div>`);
 };
 
 const setError = (message) => {
   latestChartPoints = [];
   setResult(`<div class="error-state">${message}</div>`);
+};
+
+const getListedStocks = async () => {
+  if (listedStocksCache) return listedStocksCache;
+
+  const response = await fetch(dailyEndpoint, { cache: "no-store" });
+  if (!response.ok) throw new Error("證交所資料沒有回應");
+
+  const csv = await response.text();
+  listedStocksCache = csv
+    .trim()
+    .split(/\r?\n/)
+    .slice(1)
+    .map(parseCsvLine)
+    .filter((fields) => fields.length >= 11)
+    .map((fields) => {
+      const close = parseNumber(fields[8]);
+      const change = parseNumber(fields[9]);
+      return {
+        date: fields[0],
+        code: fields[1],
+        name: fields[2],
+        volume: parseNumber(fields[3]),
+        open: parseNumber(fields[5]),
+        high: parseNumber(fields[6]),
+        low: parseNumber(fields[7]),
+        close,
+        change,
+        previousClose: Number.isFinite(change) ? close - change : NaN,
+        trades: parseNumber(fields[10]),
+      };
+    });
+
+  return listedStocksCache;
+};
+
+const resolveStock = async (query) => {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) throw new Error("請輸入公司名稱或股票代號");
+
+  const stocks = await getListedStocks();
+  const byCode = stocks.find((stock) => stock.code.toLowerCase() === normalized);
+  if (byCode) return byCode;
+
+  const exactName = stocks.find((stock) => stock.name.toLowerCase() === normalized);
+  if (exactName) return exactName;
+
+  const partialName = stocks.find((stock) => stock.name.toLowerCase().includes(normalized));
+  if (partialName) return partialName;
+
+  throw new Error("查無符合的上市股票");
 };
 
 const getMonthStarts = (count) => {
@@ -73,15 +153,10 @@ const fetchTwseMonth = async (code, dateText) => {
   const endpoint = `https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY?date=${dateText}&stockNo=${code}&response=json`;
   const response = await fetch(endpoint, { cache: "no-store" });
 
-  if (!response.ok) {
-    throw new Error("證交所資料沒有回應");
-  }
+  if (!response.ok) throw new Error("證交所歷史資料沒有回應");
 
   const data = await response.json();
-
-  if (data.stat !== "OK" || !Array.isArray(data.data)) {
-    return [];
-  }
+  if (data.stat !== "OK" || !Array.isArray(data.data)) return [];
 
   return data.data
     .map((row) => ({
@@ -99,61 +174,10 @@ const fetchTwseMonth = async (code, dateText) => {
 const getThreeMonthHistory = async (code) => {
   const monthStarts = getMonthStarts(3);
   const monthResults = await Promise.all(monthStarts.map((month) => fetchTwseMonth(code, month)));
-  const points = monthResults
-    .flat()
-    .sort((a, b) => a.date.localeCompare(b.date));
+  const points = monthResults.flat().sort((a, b) => a.date.localeCompare(b.date));
 
-  if (!points.length) {
-    throw new Error("查無近三個月資料");
-  }
-
+  if (!points.length) throw new Error("查無近三個月資料");
   return points;
-};
-
-const getStockName = async (code) => {
-  const endpoint = "https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL?response=open_data";
-  const response = await fetch(endpoint, { cache: "no-store" });
-
-  if (!response.ok) return code;
-
-  const csv = await response.text();
-  const row = csv
-    .trim()
-    .split(/\r?\n/)
-    .slice(1)
-    .map((line) => line.split(",").map((field) => field.replace(/"/g, "").trim()))
-    .find((fields) => fields[1] === code);
-
-  return row && row[2] ? row[2] : code;
-};
-
-const summarizeHistory = (code, name, points) => {
-  const latest = points[points.length - 1];
-  const previous = points.length > 1 ? points[points.length - 2] : latest;
-  const change = latest.close - previous.close;
-  const changePercent = previous.close ? (change / previous.close) * 100 : 0;
-  const highPoint = points.reduce((best, point) => (point.high > best.high ? point : best), points[0]);
-  const lowPoint = points.reduce((best, point) => (point.low < best.low ? point : best), points[0]);
-
-  return {
-    code,
-    name,
-    exchange: "上市",
-    price: latest.close,
-    previousClose: previous.close,
-    change,
-    changePercent,
-    open: latest.open,
-    high: latest.high,
-    low: latest.low,
-    volume: latest.volume,
-    time: `${formatDisplayDate(latest.date)} 收盤`,
-    rangeHigh: highPoint.high,
-    rangeHighDate: highPoint.date,
-    rangeLow: lowPoint.low,
-    rangeLowDate: lowPoint.date,
-    source: "證交所官方歷史股價",
-  };
 };
 
 const drawChart = (canvas, points) => {
@@ -177,7 +201,6 @@ const drawChart = (canvas, points) => {
   const spread = max - min || 1;
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
-
   const xFor = (index) => padding.left + (index / (points.length - 1)) * chartWidth;
   const yFor = (price) => padding.top + ((max - price) / spread) * chartHeight;
 
@@ -240,25 +263,91 @@ const drawChart = (canvas, points) => {
   ctx.fill();
 };
 
-const renderHistory = (summary, points) => {
-  const changeClass = summary.change > 0 ? "up" : summary.change < 0 ? "down" : "flat";
-  const sign = summary.change > 0 ? "+" : "";
-  const first = points[0];
-  const last = points[points.length - 1];
+const renderDaily = (stock) => {
+  const change = Number.isFinite(stock.change) ? stock.change : stock.close - stock.previousClose;
+  const changePercent = stock.previousClose ? (change / stock.previousClose) * 100 : 0;
+  const changeClass = change > 0 ? "up" : change < 0 ? "down" : "flat";
+  const sign = change > 0 ? "+" : "";
 
-  latestChartPoints = points;
-
+  latestChartPoints = [];
   setResult(`
     <article class="result-card">
       <div class="result-top">
         <div>
-          <p class="stock-name">${summary.name}</p>
-          <p class="stock-code">${summary.code} · ${summary.exchange} · TWD</p>
+          <p class="stock-name">${stock.name}</p>
+          <p class="stock-code">${stock.code} · 上市 · TWD</p>
         </div>
         <div>
-          <p class="price">${formatPrice(summary.price)}</p>
+          <p class="price">${formatPrice(stock.close)}</p>
           <span class="change ${changeClass}">
-            ${sign}${formatPrice(summary.change)} (${sign}${summary.changePercent.toFixed(2)}%)
+            ${sign}${formatPrice(change)} (${sign}${changePercent.toFixed(2)}%)
+          </span>
+        </div>
+      </div>
+
+      <dl class="quote-grid">
+        <div>
+          <dt>收盤價</dt>
+          <dd>${formatPrice(stock.close)}</dd>
+        </div>
+        <div>
+          <dt>開盤</dt>
+          <dd>${formatPrice(stock.open)}</dd>
+        </div>
+        <div>
+          <dt>最高</dt>
+          <dd>${formatPrice(stock.high)}</dd>
+        </div>
+        <div>
+          <dt>最低</dt>
+          <dd>${formatPrice(stock.low)}</dd>
+        </div>
+        <div>
+          <dt>成交量</dt>
+          <dd>${formatVolume(stock.volume)}</dd>
+        </div>
+        <div>
+          <dt>成交筆數</dt>
+          <dd>${formatVolume(stock.trades)}</dd>
+        </div>
+        <div>
+          <dt>更新日期</dt>
+          <dd>${formatRocCompactDate(stock.date)}</dd>
+        </div>
+        <div>
+          <dt>資料來源</dt>
+          <dd>證交所官方每日行情</dd>
+        </div>
+      </dl>
+
+      <p class="data-note">股價僅供參考，不構成投資建議。</p>
+    </article>
+  `);
+};
+
+const renderHistory = (stock, points) => {
+  const latest = points[points.length - 1];
+  const previous = points.length > 1 ? points[points.length - 2] : latest;
+  const change = latest.close - previous.close;
+  const changePercent = previous.close ? (change / previous.close) * 100 : 0;
+  const changeClass = change > 0 ? "up" : change < 0 ? "down" : "flat";
+  const sign = change > 0 ? "+" : "";
+  const first = points[0];
+  const highPoint = points.reduce((best, point) => (point.high > best.high ? point : best), points[0]);
+  const lowPoint = points.reduce((best, point) => (point.low < best.low ? point : best), points[0]);
+
+  latestChartPoints = points;
+  setResult(`
+    <article class="result-card">
+      <div class="result-top">
+        <div>
+          <p class="stock-name">${stock.name}</p>
+          <p class="stock-code">${stock.code} · 上市 · TWD</p>
+        </div>
+        <div>
+          <p class="price">${formatPrice(latest.close)}</p>
+          <span class="change ${changeClass}">
+            ${sign}${formatPrice(change)} (${sign}${changePercent.toFixed(2)}%)
           </span>
         </div>
       </div>
@@ -267,7 +356,7 @@ const renderHistory = (summary, points) => {
         <div class="chart-header">
           <div>
             <h3>近三個月收盤價走勢</h3>
-            <p>${formatDisplayDate(first.date)} - ${formatDisplayDate(last.date)}</p>
+            <p>${formatDisplayDate(first.date)} - ${formatDisplayDate(latest.date)}</p>
           </div>
           <span>${points.length} 個交易日</span>
         </div>
@@ -277,70 +366,56 @@ const renderHistory = (summary, points) => {
       <dl class="quote-grid">
         <div>
           <dt>最新收盤</dt>
-          <dd>${formatPrice(summary.price)}</dd>
+          <dd>${formatPrice(latest.close)}</dd>
         </div>
         <div>
-          <dt>開盤</dt>
-          <dd>${formatPrice(summary.open)}</dd>
-        </div>
-        <div>
-          <dt>最高</dt>
-          <dd>${formatPrice(summary.high)}</dd>
-        </div>
-        <div>
-          <dt>最低</dt>
-          <dd>${formatPrice(summary.low)}</dd>
-        </div>
-        <div>
-          <dt>成交量</dt>
-          <dd>${formatVolume(summary.volume)}</dd>
-        </div>
-        <div>
-          <dt>更新時間</dt>
-          <dd>${summary.time}</dd>
+          <dt>最新成交量</dt>
+          <dd>${formatVolume(latest.volume)}</dd>
         </div>
         <div>
           <dt>三個月高點</dt>
-          <dd>${formatPrice(summary.rangeHigh)} · ${formatDisplayDate(summary.rangeHighDate).slice(5)}</dd>
+          <dd>${formatPrice(highPoint.high)} · ${formatDisplayDate(highPoint.date).slice(5)}</dd>
         </div>
         <div>
           <dt>三個月低點</dt>
-          <dd>${formatPrice(summary.rangeLow)} · ${formatDisplayDate(summary.rangeLowDate).slice(5)}</dd>
+          <dd>${formatPrice(lowPoint.low)} · ${formatDisplayDate(lowPoint.date).slice(5)}</dd>
         </div>
       </dl>
 
-      <p class="data-note">資料來源：${summary.source}。股價僅供參考，不構成投資建議。</p>
+      <p class="data-note">資料來源：證交所官方歷史股價。股價僅供參考，不構成投資建議。</p>
     </article>
   `);
 
   drawChart(document.querySelector("#price-chart"), points);
 };
 
-const lookupHistory = async (code) => {
-  const points = await getThreeMonthHistory(code);
-  const name = await getStockName(code);
-  const summary = summarizeHistory(code, name, points);
-  renderHistory(summary, points);
-};
-
 if (form) {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const code = input.value.trim().replace(/\D/g, "");
-    input.value = code;
+    const query = input.value.trim();
+    const mode = new FormData(form).get("queryMode");
 
-    if (!/^\d{4,6}$/.test(code)) {
-      setError("請輸入正確的台股代號，例如 2330、0050、2317。");
+    if (!query) {
+      setError("請輸入中文公司名稱或股票代號，例如 台積電、鴻海、2330。");
       return;
     }
 
-    setLoading(code);
+    setLoading(`正在查詢 ${query}...`);
 
     try {
-      await lookupHistory(code);
+      const stock = await resolveStock(query);
+      input.value = stock.name;
+
+      if (mode === "history") {
+        setLoading(`正在查詢 ${stock.name} ${stock.code} 近三個月收盤價...`);
+        const points = await getThreeMonthHistory(stock.code);
+        renderHistory(stock, points);
+      } else {
+        renderDaily(stock);
+      }
     } catch (error) {
-      setError("目前查不到這個代號的三個月股價圖。請先確認是否為上市股票代號，或稍後再試。");
+      setError("目前查不到這個公司或代號。請確認是否為上市股票，例如 台積電、鴻海、2330、0050。");
     }
   });
 }
