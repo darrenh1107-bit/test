@@ -30,6 +30,16 @@ const parseNumber = (value) => {
   return Number.isFinite(number) ? number : NaN;
 };
 
+const normalizeSearchText = (value) => {
+  return String(value)
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/臺/g, "台")
+    .replace(/\s+/g, "")
+    .replace(/[()（）.,，。_\-－]/g, "")
+    .trim();
+};
+
 const parseCsvLine = (line) => {
   const fields = [];
   let current = "";
@@ -119,17 +129,19 @@ const getListedStocks = async () => {
 };
 
 const resolveStock = async (query) => {
-  const normalized = query.trim().toLowerCase();
+  const normalized = normalizeSearchText(query);
   if (!normalized) throw new Error("請輸入公司名稱或股票代號");
 
   const stocks = await getListedStocks();
-  const byCode = stocks.find((stock) => stock.code.toLowerCase() === normalized);
+  const codeMatch = normalized.match(/\d{4,6}/);
+  const codeInQuery = codeMatch ? codeMatch[0] : "";
+  const byCode = stocks.find((stock) => stock.code === normalized || stock.code === codeInQuery);
   if (byCode) return byCode;
 
-  const exactName = stocks.find((stock) => stock.name.toLowerCase() === normalized);
+  const exactName = stocks.find((stock) => normalizeSearchText(stock.name) === normalized);
   if (exactName) return exactName;
 
-  const partialName = stocks.find((stock) => stock.name.toLowerCase().includes(normalized));
+  const partialName = stocks.find((stock) => normalizeSearchText(stock.name).includes(normalized));
   if (partialName) return partialName;
 
   throw new Error("查無符合的上市股票");
@@ -397,7 +409,7 @@ if (form) {
     const mode = new FormData(form).get("queryMode");
 
     if (!query) {
-      setError("請輸入中文公司名稱或股票代號，例如 台積電、鴻海、2330。");
+      setError("請輸入中文公司名稱或股票代號，例如 台積電、臺積電、鴻海、2330。");
       return;
     }
 
@@ -415,7 +427,7 @@ if (form) {
         renderDaily(stock);
       }
     } catch (error) {
-      setError("目前查不到這個公司或代號。請確認是否為上市股票，例如 台積電、鴻海、2330、0050。");
+      setError("目前查不到這個公司或代號。請確認是否為上市股票，例如 台積電、臺積電、鴻海、2330、0050。");
     }
   });
 }

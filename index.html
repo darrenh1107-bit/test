@@ -49,11 +49,21 @@
               <input
                 id="stock-query"
                 name="stockQuery"
+                list="stock-suggestions"
                 autocomplete="off"
                 maxlength="30"
-                placeholder="例如 台積電、鴻海、2330"
+                placeholder="例如 台積電、臺積電、鴻海、2330"
                 required
               />
+              <datalist id="stock-suggestions">
+                <option value="台積電"></option>
+                <option value="鴻海"></option>
+                <option value="聯發科"></option>
+                <option value="中華電"></option>
+                <option value="0050"></option>
+                <option value="2330"></option>
+                <option value="2317"></option>
+              </datalist>
               <button class="button primary" type="submit">查詢</button>
             </div>
 
@@ -70,7 +80,7 @@
             </fieldset>
 
             <p class="form-hint">
-              支援上市股票代號與中文名稱，例如 2330、台積電、2317、鴻海、0050。
+              支援上市股票代號與中文名稱，例如 2330、台積電、臺積電、2317、鴻海、0050。
             </p>
           </form>
 
