@@ -1,155 +1,133 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Darren | Creative Portfolio</title>
-  <meta name="description" content="Darren 的個人網站，展示作品、能力與聯絡方式。">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <header class="site-header">
-    <a class="brand" href="#home" aria-label="Darren home">
-      <span>D</span>
-      Darren
-    </a>
-    <nav class="nav" aria-label="主要導覽">
-      <a href="#work">作品</a>
-      <a href="#skills">能力</a>
-      <a href="#contact">聯絡</a>
-    </nav>
-  </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Darren | 個人網站</title>
+    <meta
+      name="description"
+      content="Darren 的個人網站，展示作品、技能與聯絡資訊。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Darren 首頁">Darren</a>
+      <nav class="site-nav" aria-label="主要導覽">
+        <a href="#about">關於</a>
+        <a href="#work">作品</a>
+        <a href="#skills">技能</a>
+        <a href="#contact">聯絡</a>
+      </nav>
+    </header>
 
-  <main>
-    <section id="home" class="hero">
-      <div class="hero-visual" aria-hidden="true">
-        <div class="portrait">
-          <span>DA</span>
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Personal Website</p>
+          <h1>Darren 的線上個人網站</h1>
+          <p class="hero-text">
+            這是一個乾淨、快速、適合放在 GitHub Pages 的個人首頁，可以用來介紹自己、展示作品，也能讓別人快速找到你的聯絡方式。
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#work">查看作品</a>
+            <a class="button secondary" href="#contact">聯絡我</a>
+          </div>
         </div>
-        <div class="status-panel">
-          <span class="status-dot"></span>
-          <span id="server-status">Connecting to Darren site</span>
+        <div class="profile-panel" aria-label="Darren profile">
+          <div class="avatar">D</div>
+          <div>
+            <p class="profile-name">Darren</p>
+            <p class="profile-role">Creator / Developer</p>
+          </div>
+          <dl class="profile-stats">
+            <div>
+              <dt>Focus</dt>
+              <dd>Web</dd>
+            </div>
+            <div>
+              <dt>Style</dt>
+              <dd>Clean</dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd>Online</dd>
+            </div>
+          </dl>
         </div>
-      </div>
-      <div class="hero-copy">
-        <p class="eyebrow">Personal website</p>
-        <h1>Darren</h1>
-        <p class="lead">
-          打造清楚、有質感、能真正被使用的數位體驗。這裡收集 Darren 的作品、能力與最新計畫。
+      </section>
+
+      <section id="about" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">About</p>
+          <h2>關於 Darren</h2>
+        </div>
+        <p class="section-text">
+          我喜歡把想法做成能被使用的網站與工具。這個頁面可以繼續擴充成作品集、履歷、部落格或專案介紹頁。
         </p>
-        <div class="hero-actions">
-          <a class="button primary" href="#work">查看作品</a>
-          <a class="button secondary" href="#contact">開始聯絡</a>
-        </div>
-        <div class="online-card" aria-live="polite">
-          <span>Live site</span>
-          <strong id="live-message">等待網站伺服器回應...</strong>
-          <small id="live-time">尚未連線</small>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="intro" aria-label="簡介">
-      <div>
-        <span class="section-kicker">About</span>
-        <h2>把想法整理成可以落地的網站與產品。</h2>
-      </div>
-      <p>
-        Darren 專注於清楚的視覺層次、流暢的互動與實用的內容架構。無論是個人品牌、作品集、
-        小型產品頁或活動網站，都能快速整理重點並做出可展示的成果。
-      </p>
-    </section>
-
-    <section id="work" class="section">
-      <div class="section-heading">
-        <span class="section-kicker">Selected work</span>
-        <h2>近期作品</h2>
-      </div>
-      <div class="work-grid">
-        <article class="work-card">
-          <div class="work-image image-one"></div>
-          <div class="work-content">
-            <span>Brand site</span>
+      <section id="work" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Work</p>
+          <h2>精選作品</h2>
+        </div>
+        <div class="work-grid">
+          <article class="work-card">
+            <span class="tag">Website</span>
             <h3>個人品牌首頁</h3>
-            <p>以強烈首頁視覺、短句文案與清楚行動按鈕，讓訪客快速理解 Darren 是誰。</p>
-          </div>
-        </article>
-        <article class="work-card">
-          <div class="work-image image-two"></div>
-          <div class="work-content">
-            <span>Dashboard</span>
-            <h3>任務管理介面</h3>
-            <p>為日常工作設計的資訊面板，重視掃讀效率、狀態辨識與操作節奏。</p>
-          </div>
-        </article>
-        <article class="work-card">
-          <div class="work-image image-three"></div>
-          <div class="work-content">
-            <span>Campaign</span>
-            <h3>活動展示頁</h3>
-            <p>將活動亮點、時程與報名資訊集中呈現，適合短期宣傳與社群導流。</p>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section id="skills" class="section split-section">
-      <div class="section-heading">
-        <span class="section-kicker">Capabilities</span>
-        <h2>能做什麼</h2>
-      </div>
-      <div class="skill-list">
-        <div class="skill-item">
-          <span>01</span>
-          <h3>網站設計</h3>
-          <p>從內容架構、版面視覺到響應式頁面，建立完整可用的網站。</p>
+            <p>一頁式介紹網站，適合展示個人特色、服務內容與聯絡入口。</p>
+          </article>
+          <article class="work-card">
+            <span class="tag">Project</span>
+            <h3>作品展示區</h3>
+            <p>可以放 GitHub 專案、設計作品、課堂成果或任何想公開分享的內容。</p>
+          </article>
+          <article class="work-card">
+            <span class="tag">Contact</span>
+            <h3>快速聯絡</h3>
+            <p>保留清楚的行動按鈕，讓訪客能快速找到你並展開合作。</p>
+          </article>
         </div>
-        <div class="skill-item">
-          <span>02</span>
-          <h3>互動原型</h3>
-          <p>快速做出能點、能看、能測試的原型，協助驗證想法與流程。</p>
+      </section>
+
+      <section id="skills" class="section split-section">
+        <div class="section-heading">
+          <p class="eyebrow">Skills</p>
+          <h2>技能與方向</h2>
         </div>
-        <div class="skill-item">
-          <span>03</span>
-          <h3>內容整理</h3>
-          <p>把零散資訊轉成有順序、有重點、能被理解的頁面內容。</p>
+        <div class="skill-list">
+          <span>HTML</span>
+          <span>CSS</span>
+          <span>JavaScript</span>
+          <span>GitHub Pages</span>
+          <span>UI Design</span>
+          <span>Responsive Web</span>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="contact" class="contact">
-      <div>
-        <span class="section-kicker">Contact</span>
-        <h2>有想做的網站或作品頁？</h2>
-        <p>留下訊息，或直接把這個網站改成你的正式個人頁。</p>
-      </div>
-      <form class="contact-form">
-        <label>
-          名字
-          <input type="text" name="name" placeholder="你的名字">
-        </label>
-        <label>
-          Email
-          <input type="email" name="email" placeholder="hello@example.com">
-        </label>
-        <label>
-          想說的話
-          <textarea name="message" rows="4" placeholder="簡單說明你的想法"></textarea>
-        </label>
-        <button type="submit">送出訊息</button>
-        <p class="form-note" role="status"></p>
-      </form>
-    </section>
-  </main>
+      <section id="contact" class="section contact-section">
+        <div>
+          <p class="eyebrow">Contact</p>
+          <h2>一起開始下一個想法</h2>
+          <p class="section-text">
+            你可以把這裡改成自己的 Email、Instagram、LinkedIn 或 GitHub 連結。
+          </p>
+        </div>
+        <a class="button primary" href="mailto:hello@example.com">hello@example.com</a>
+      </section>
+    </main>
 
-  <footer class="site-footer">
-    <span>Darren</span>
-    <p>Designed for clear ideas and useful experiences.</p>
-  </footer>
+    <footer class="site-footer">
+      <p>© <span id="year"></span> Darren. All rights reserved.</p>
+    </footer>
 
-  <script src="script.js"></script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
