@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Darren | 個人網站</title>
+    <title>Darren 投資網站 | 台股今日股價查詢</title>
     <meta
       name="description"
-      content="Darren 的個人網站，展示作品、技能與聯絡資訊。"
+      content="Darren 投資網站，輸入台股代號即可查詢今日股價、漲跌、成交量與更新時間。"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -18,114 +18,93 @@
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="#top" aria-label="Darren 首頁">Darren</a>
+      <a class="brand" href="#top" aria-label="Darren 投資網站">Darren Invest</a>
       <nav class="site-nav" aria-label="主要導覽">
-        <a href="#about">關於</a>
-        <a href="#work">作品</a>
-        <a href="#skills">技能</a>
-        <a href="#contact">聯絡</a>
+        <a href="#quote">查股價</a>
+        <a href="#features">功能</a>
+        <a href="#notes">提醒</a>
       </nav>
     </header>
 
     <main id="top">
       <section class="hero">
         <div class="hero-copy">
-          <p class="eyebrow">Personal Website</p>
-          <h1>Darren 的線上個人網站</h1>
+          <p class="eyebrow">Taiwan Stock Quote</p>
+          <h1>Darren 投資網站</h1>
           <p class="hero-text">
-            這是一個乾淨、快速、適合放在 GitHub Pages 的個人首頁，可以用來介紹自己、展示作品，也能讓別人快速找到你的聯絡方式。
+            輸入台股代號，快速查看今日股價、漲跌、開盤、最高、最低與昨收資訊。適合用來做每日盤中追蹤與收盤後快速確認。
           </p>
-          <div class="hero-actions">
-            <a class="button primary" href="#work">查看作品</a>
-            <a class="button secondary" href="#contact">聯絡我</a>
-          </div>
+          <a class="button primary" href="#quote">開始查詢</a>
         </div>
-        <div class="profile-panel" aria-label="Darren profile">
-          <div class="avatar">D</div>
-          <div>
-            <p class="profile-name">Darren</p>
-            <p class="profile-role">Creator / Developer</p>
+
+        <section id="quote" class="quote-panel" aria-labelledby="quote-title">
+          <div class="quote-heading">
+            <p class="eyebrow">Quote Search</p>
+            <h2 id="quote-title">今日股價查詢</h2>
           </div>
-          <dl class="profile-stats">
-            <div>
-              <dt>Focus</dt>
-              <dd>Web</dd>
+
+          <form class="quote-form" id="quote-form">
+            <label for="stock-code">台股代號</label>
+            <div class="search-row">
+              <input
+                id="stock-code"
+                name="stockCode"
+                inputmode="numeric"
+                autocomplete="off"
+                maxlength="6"
+                placeholder="例如 2330"
+                required
+              />
+              <button class="button primary" type="submit">查詢</button>
             </div>
-            <div>
-              <dt>Style</dt>
-              <dd>Clean</dd>
+            <p class="form-hint">支援上市與上櫃股票，例如 2330、2317、0050、6488。</p>
+          </form>
+
+          <div class="quote-result" id="quote-result" aria-live="polite">
+            <div class="empty-state">
+              <span>輸入股票代號後，這裡會顯示今日報價。</span>
             </div>
-            <div>
-              <dt>Status</dt>
-              <dd>Online</dd>
-            </div>
-          </dl>
+          </div>
+        </section>
+      </section>
+
+      <section id="features" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Features</p>
+          <h2>查詢重點</h2>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <span class="tag">Price</span>
+            <h3>今日成交價</h3>
+            <p>顯示最近成交價，並附上開盤、最高、最低與昨收資訊。</p>
+          </article>
+          <article class="feature-card">
+            <span class="tag">Change</span>
+            <h3>漲跌與百分比</h3>
+            <p>用顏色標示上漲、下跌或平盤，方便快速判斷盤勢。</p>
+          </article>
+          <article class="feature-card">
+            <span class="tag">Volume</span>
+          <h3>資料來源標示</h3>
+          <p>顯示報價來源；若來源提供成交量或更新時間，也會一起呈現。</p>
+          </article>
         </div>
       </section>
 
-      <section id="about" class="section">
-        <div class="section-heading">
-          <p class="eyebrow">About</p>
-          <h2>關於 Darren</h2>
+      <section id="notes" class="section notes-section">
+        <div>
+          <p class="eyebrow">Notes</p>
+          <h2>投資提醒</h2>
         </div>
         <p class="section-text">
-          我喜歡把想法做成能被使用的網站與工具。這個頁面可以繼續擴充成作品集、履歷、部落格或專案介紹頁。
+          本站提供股價查詢與資訊整理，不構成投資建議。股價資料可能因資料來源、交易時段或網路狀態而延遲，實際交易前請以券商或交易所資料為準。
         </p>
-      </section>
-
-      <section id="work" class="section">
-        <div class="section-heading">
-          <p class="eyebrow">Work</p>
-          <h2>精選作品</h2>
-        </div>
-        <div class="work-grid">
-          <article class="work-card">
-            <span class="tag">Website</span>
-            <h3>個人品牌首頁</h3>
-            <p>一頁式介紹網站，適合展示個人特色、服務內容與聯絡入口。</p>
-          </article>
-          <article class="work-card">
-            <span class="tag">Project</span>
-            <h3>作品展示區</h3>
-            <p>可以放 GitHub 專案、設計作品、課堂成果或任何想公開分享的內容。</p>
-          </article>
-          <article class="work-card">
-            <span class="tag">Contact</span>
-            <h3>快速聯絡</h3>
-            <p>保留清楚的行動按鈕，讓訪客能快速找到你並展開合作。</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="skills" class="section split-section">
-        <div class="section-heading">
-          <p class="eyebrow">Skills</p>
-          <h2>技能與方向</h2>
-        </div>
-        <div class="skill-list">
-          <span>HTML</span>
-          <span>CSS</span>
-          <span>JavaScript</span>
-          <span>GitHub Pages</span>
-          <span>UI Design</span>
-          <span>Responsive Web</span>
-        </div>
-      </section>
-
-      <section id="contact" class="section contact-section">
-        <div>
-          <p class="eyebrow">Contact</p>
-          <h2>一起開始下一個想法</h2>
-          <p class="section-text">
-            你可以把這裡改成自己的 Email、Instagram、LinkedIn 或 GitHub 連結。
-          </p>
-        </div>
-        <a class="button primary" href="mailto:hello@example.com">hello@example.com</a>
       </section>
     </main>
 
     <footer class="site-footer">
-      <p>© <span id="year"></span> Darren. All rights reserved.</p>
+      <p>© <span id="year"></span> Darren Invest. Data is for reference only.</p>
     </footer>
 
     <script src="script.js"></script>
